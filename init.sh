@@ -8,6 +8,14 @@ else
   echo "ipmitool is already installed."
 fi
 
+# Install sshpass if not already installed
+if ! command -v sshpass &> /dev/null; then
+  echo "Installing sshpass..."
+  sudo apt update && sudo apt install -y sshpass
+else
+  echo "sshpass is already installed."
+fi
+
 # Set the working directory
 WORKDIR=$(pwd)
 
@@ -16,10 +24,13 @@ if [ ! -f "$WORKDIR/.env" ]; then
   echo "Creating .env file..."
   cat <<EOL > "$WORKDIR/.env"
 IPMI_HOST=your_server_ip
-IPMI_USER=your_username
-IPMI_PASS=your_password
+IPMI_USER=your_ipmi_username
+IPMI_PASS=your_ipmi_password
+SSH_USER=your_ssh_username
+SSH_PASS=your_ssh_password
+PBS_HOST=your_ssh_ip
 EOL
-  echo "Please edit the .env file with your IPMI credentials."
+  echo "Please edit the .env file with your IPMI and SSH credentials."
 else
   echo ".env file already exists."
 fi
@@ -38,12 +49,12 @@ fi
 
 # Function to turn on the PBS server
 turn_on_server() {
-  ipmitool -I lanplus -H "$IPMI_HOST" -U "$IPMI_USER" -P "$IPMI_PASS" power on
+  ipmitool -I lanplus -H "$IPMI_HOST" -U "$IPMI_USER" -P "$IPMI_PASS" chassis power on
 }
 
-# Function to turn off the PBS server
+# Function to shut down the PBS server over SSH
 turn_off_server() {
-  ipmitool -I lanplus -H "$IPMI_HOST" -U "$IPMI_USER" -P "$IPMI_PASS" power off
+  sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no "$SSH_USER@$IPMI_HOST" "sudo shutdown now"
 }
 
 # Continuous loop to check the time

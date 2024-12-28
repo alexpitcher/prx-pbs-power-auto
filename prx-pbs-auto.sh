@@ -10,12 +10,12 @@ fi
 
 # Function to turn on the PBS server
 turn_on_server() {
-  ipmitool -I lanplus -H "$IPMI_HOST" -U "$IPMI_USER" -P "$IPMI_PASS" power on
+  ipmitool -I lanplus -H "$IPMI_HOST" -U "$IPMI_USER" -P "$IPMI_PASS" chassis power on
 }
 
-# Function to turn off the PBS server
+# Function to shut down the PBS server over SSH
 turn_off_server() {
-  ipmitool -I lanplus -H "$IPMI_HOST" -U "$IPMI_USER" -P "$IPMI_PASS" power off
+  sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no "$SSH_USER@$PBS_HOST" "sudo shutdown now"
 }
 
 # Continuous loop to check the time
