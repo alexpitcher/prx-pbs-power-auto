@@ -36,7 +36,7 @@ else
 fi
 
 # Create the automation script
-cat <<'EOL' > "$WORKDIR/pbs_auto.sh"
+cat <<'EOL' > "$WORKDIR/prx-pbs-auto.sh"
 #!/bin/bash
 
 # Load .env file
@@ -77,7 +77,7 @@ done
 EOL
 
 # Make the automation script executable
-chmod +x "$WORKDIR/pbs_auto.sh"
+chmod +x "$WORKDIR/prx-pbs-auto.sh"
 
 # Create the systemd service file
 SERVICE_PATH="/etc/systemd/system/pbs_auto.service"
@@ -91,7 +91,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/bin/bash $WORKDIR/pbs_auto.sh
+ExecStart=/bin/bash $WORKDIR/prx-pbs-auto.sh
 WorkingDirectory=$WORKDIR
 EnvironmentFile=$WORKDIR/.env
 Restart=always
