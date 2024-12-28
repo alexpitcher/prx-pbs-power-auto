@@ -1,3 +1,14 @@
+#!/bin/bash
+
+# Load .env file
+if [ -f .env ]; then
+  export $(cat .env | xargs)
+else
+  echo ".env file not found"
+  exit 1
+fi
+
+
 # Function to turn on the PBS server
 turn_on_server() {
   ipmitool -I lanplus -H "$IPMI_HOST" -U "$IPMI_USER" -P "$IPMI_PASS" chassis power on
