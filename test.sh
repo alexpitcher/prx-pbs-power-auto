@@ -16,7 +16,7 @@ turn_on_server() {
 
 # Function to shut down the PBS server over SSH
 turn_off_server() {
-  sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no "$SSH_USER@$PBS_HOST" "sudo shutdown now"
+  sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no "$SSH_USER@$PBS_HOST" "sudo -S shutdown now"
 }
 
 # Ask the user if they want to start or stop the server

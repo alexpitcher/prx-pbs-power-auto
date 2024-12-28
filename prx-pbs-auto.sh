@@ -15,23 +15,47 @@ turn_on_server() {
 
 # Function to shut down the PBS server over SSH
 turn_off_server() {
-  sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no "$SSH_USER@$PBS_HOST" "sudo shutdown now"
+  sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no "$SSH_USER@$PBS_HOST" "sudo -S shutdown now"
 }
+
+# Function to get user input for power schedule
+get_power_schedule() {
+  echo "Select power schedule:"
+  echo "1) Weekly"
+  echo "2) Biweekly"
+  echo "3) Monthly"
+  echo "4) Bimonthly"
+  read -p "Enter your choice (1-4): " schedule_choice
+
+  read -p "Enter the day(s) to run (e.g., 1 for Monday, 7 for Sunday): " days
+  read -p "Enter the time to power on the server (HH:MM): " power_on_time
+  read -p "Enter the duration to keep the server on (in minutes): " duration
+
+  # Calculate shutdown time
+  shutdown_time=$(date -d "$power_on_time + $duration minutes" +"%H:%M")
+}
+
+# Get the power schedule from the user
+get_power_schedule
 
 # Continuous loop to check the time
 while true; do
   current_time=$(date +"%H:%M")
   current_day=$(date +"%u")  # 7 is Sunday
 
-  # Turn on at 00:30 and off at 02:00 on Sunday
-  if [ "$current_day" -eq 7 ] && [ "$current_time" == "00:30" ]; then
-    echo "Turning on server..."
-    turn_on_server
-    sleep 90
-  elif [ "$current_day" -eq 7 ] && [ "$current_time" == "02:00" ]; then
-    echo "Shutting down server..."
-    turn_off_server
-    sleep 90
+  # Check if the current day is in the specified days
+  if [[ $days == *"$current_day"* ]]; then
+    # Turn on at specified time
+    if [ "$current_time" == "$power_on_time" ]; then
+      echo "Turning on server..."
+      turn_on_server
+      sleep 90
+    # Shut down at calculated shutdown time
+    elif [ "$current_time" == "$shutdown_time" ]; then
+      echo "Shutting down server..."
+      turn_off_server
+      sleep 90
+    fi
   fi
   sleep 60
 done
